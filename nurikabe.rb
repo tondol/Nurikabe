@@ -57,8 +57,8 @@ end
 
 class Nurikabe
   U = "0"
-  E = " "
-  F = "#"
+  W = " "
+  B = "#"
   
   def initialize(n, m, board)
     @n = n
@@ -73,17 +73,17 @@ class Nurikabe
     s
   end
 
-  def empty?(v)
-    v == E
+  def white?(v)
+    v == W
   end
   def number?(v)
     (v =~ /^[1-9]$/) != nil
   end
-  def filled?(v)
-    v == F
+  def black?(v)
+    v == B
   end
   def decided?(v)
-    empty?(v) || number?(v) || filled?(v)
+    white?(v) || number?(v) || black?(v)
   end
 
   ######################################
@@ -93,21 +93,21 @@ class Nurikabe
   # 未確定、白・数字、黒に対してそれぞれ異なる値を返却する
   def group_type(v)
     case true
-    when empty?(v) || number?(v)
+    when white?(v) || number?(v)
       1
-    when filled?(v)
+    when black?(v)
       2
     else
       0
     end
   end
   # 未確定と白・数字を同一視する
-  def group_type_empty(v)
-    v == U ? group_type(E) : group_type(v)
+  def group_type_white(v)
+    v == U ? group_type(W) : group_type(v)
   end
   # 未確定と黒を同一視する
-  def group_type_filled(v)
-    v == U ? group_type(F) : group_type(v)
+  def group_type_black(v)
+    v == U ? group_type(B) : group_type(v)
   end
   # ルックアップテーブルを作成する
   def group_map(t)
@@ -178,66 +178,90 @@ class Nurikabe
   def group
     return @group if @group
 
-    proc = proc {|v1, v2| group_type(v1) == group_type(v2) }
-    @group = group_index(&proc)
+    @group = group_index {|v1, v2|
+      group_type(v1) == group_type(v2)
+    }
   end
   # 未確定を白と見做し、4連結ラベリングする
-  def group_empty
-    return @group_empty if @group_empty
+  def group_white
+    return @group_white if @group_white
 
-    proc = proc {|v1, v2| group_type_empty(v1) == group_type_empty(v2) }
-    @group_empty = group_index(&proc)
+    @group_white = group_index {|v1, v2|
+      group_type_white(v1) == group_type_white(v2)
+    }
   end
   # 未確定を黒と見做し、4連結ラベリングする
-  def group_filled
-    return @group_filled if @group_filled
+  def group_black
+    return @group_black if @group_black
 
-    proc = proc {|v1, v2| group_type_filled(v1) == group_type_filled(v2) }
-    @group_filled = group_index(&proc)
+    @group_black = group_index {|v1, v2|
+      group_type_black(v1) == group_type_black(v2)
+    }
+  end
+  # ラベリング結果からHashを生成する
+  def group_to_h(t)
+    h = Hash.new
+
+    t.each_with_index {|index, i, j|
+      h[index] = [] unless h.has_key?(index)
+      h[index].push(yield(index, i, j));
+    }
+
+    h
   end
 
   ######################################
-  # summary
+  # hash
   ######################################
 
   # 各エリアの文字配列を要素とする配列
-  def summary
-    return @summary if @summary
+  def hash_keys
+    return @hash_keys if @hash_keys
 
-    h = Hash.new
-
-    group.each_with_index {|index, i, j|
-      h[index] = [] unless h.has_key?(index)
-      h[index].push(@board[i, j])
+    @hash_keys = group_to_h(group) {|index, i, j|
+      [i, j]
     }
-
-    @summary = h
   end
   # 未確定を白と見做したときの、各エリアの文字配列を要素とする配列
-  def summary_empty
-    return @summary_empty if @summary_empty
+  def hash_keys_white
+    return @hash_keys_white if @hash_keys_white
 
-    h = Hash.new
-
-    group_empty.each_with_index {|index, i, j|
-      h[index] = [] unless h.has_key?(index)
-      h[index].push(@board[i, j])
+    @hash_keys_white = group_to_h(group_white) {|index, i, j|
+      [i, j]
     }
-
-    @summary_empty = h
   end
   # 未確定を黒と見做したときの、各エリアの文字配列を要素とする配列
-  def summary_filled
-    return @summary_filled if @summary_filled
+  def hash_keys_black
+    return @hash_keys_black if @hash_keys_black
 
-    h = Hash.new
-
-    group_filled.each_with_index {|index, i, j|
-      h[index] = [] unless h.has_key?(index)
-      h[index].push(@board[i, j])
+    @hash_keys_black = group_to_h(group_black) {|index, i, j|
+      [i, j]
     }
+  end
 
-    @summary_filled = h
+  # 各エリアの位置配列を要素とする配列
+  def hash_values
+    return @hash_values if @hash_values
+
+    @hash_values = group_to_h(group) {|index, i, j|
+      @board[i, j]
+    }
+  end
+  # 未確定を白と見做したときの、各エリアの位置配列を要素とする配列
+  def hash_values_white
+    return @hash_values_white if @hash_values_white
+
+    @hash_values_white = group_to_h(group_white) {|index, i, j|
+      @board[i, j]
+    }
+  end
+  # 未確定を黒と見做したときの、各エリアの位置配列を要素とする配列
+  def hash_values_black
+    return @hash_values_black if @hash_values_black
+
+    @hash_values_black = group_to_h(group_black) {|index, i, j|
+      @board[i, j]
+    }
   end
 
   ######################################
@@ -247,7 +271,7 @@ class Nurikabe
   # 2x2以上の黒マスの固まりがあるとNG
   def check_2x2
     @board.each_with_index.map {|value, i, j|
-      i > 0 && j > 0 && value == F &&
+      i > 0 && j > 0 && value == B &&
         @board[i - 0, j - 0] == @board[i - 0, j - 1] &&
         @board[i - 0, j - 1] == @board[i - 1, j - 0] &&
         @board[i - 1, j - 0] == @board[i - 1, j - 1]
@@ -256,20 +280,24 @@ class Nurikabe
   # 黒が連結である
   # つまり黒を含むエリアの個数が1
   def check_continuity
-    summary.map {|index, values| values.include?(F) }.one?
+    hash_values.map {|index, values|
+      values.include?(B)
+    }.one?
   end
   # 各エリアにおいて下記のどれかが真
   # -> すべて黒
   # -> 含まれる数字が1個 && 数字以外はすべて白 && 要素数と数字が同じ
   def check_combination
-    summary.each_pair {|index, values|
+    hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
-      count_e = values.count {|v| empty?(v) }
+      count_w = values.count {|v| white?(v) }
       count_n = values.count {|v| number?(v) }
-      count_f = values.count {|v| filled?(v) }
+      count_b = values.count {|v| black?(v) }
 
-      next if count_f == values.size
-      next if count_n == 1 && count_e == values.size - 1 && number.to_i == values.size
+      next if count_b == values.size
+      next if count_n == 1 &&
+        count_w == values.size - 1 &&
+        number.to_i == values.size
       return false
     }
 
@@ -277,7 +305,7 @@ class Nurikabe
   end
   # 回答をチェックする
   def check
-    @group = @summary = nil
+    @group = @hash_keys = @hash_values = nil
 
     check_2x2 &&
       check_continuity &&
@@ -287,22 +315,30 @@ class Nurikabe
   # 未確定を黒と見做したとき、黒が連結である
   # つまり黒を含むエリアの個数が0または1
   def check_continuity_incomplete
-    count = summary_filled.count {|index, values| values.include?(F) }
+    count = hash_values_black.count {|index, values|
+      values.include?(B)
+    }
     count == 0 || count == 1
   end
   # 各エリアについて下記のどれかが真
-  # -> すべて黒 || すべて白 || すべて未確定
+  # -> すべて黒
+  # -> すべて白
+  # -> すべて未確定
   # -> 含まれる数字が1個 && 数字以外はすべて白 && 要素数が数字以下
   def check_combination_incomplete
-    summary.each_pair {|index, values|
+    hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
       count_u = values.count {|v| !decided?(v) }
-      count_e = values.count {|v| empty?(v) }
+      count_w = values.count {|v| white?(v) }
       count_n = values.count {|v| number?(v) }
-      count_f = values.count {|v| filled?(v) }
+      count_b = values.count {|v| black?(v) }
 
-      next if count_u == values.size || count_e == values.size || count_f == values.size
-      next if count_n == 1 && count_e == values.size - 1 && number.to_i >= values.size
+      next if count_u == values.size
+      next if count_w == values.size
+      next if count_b == values.size
+      next if count_n == 1 &&
+        count_w == values.size - 1 &&
+        number.to_i >= values.size
       return false
     }
 
@@ -310,31 +346,31 @@ class Nurikabe
   end
   # 未確定を白と見做したとき、エリアがすべて白ならNG
   def check_no_number
-    summary_empty.map {|index, values|
-      count = values.count {|v| empty?(v) }
+    hash_values_white.map {|index, values|
+      count = values.count {|v| white?(v) }
       count != values.size
     }.all?
   end
   # エリアの要素数が数字以下ならOK
   # -> 今後の拡張を考慮する
   def check_number_less
-    summary.map {|index, values|
+    hash_values.map {|index, values|
       number = values.find {|v| number?(v) }
       number == nil || number.to_i >= values.size
     }.all?
   end
   # 未確定を白と見做したとき、エリアの要素数が数字以上ならOK
   def check_number_more
-    summary_empty.map {|index, values|
+    hash_values_white.map {|index, values|
       number = values.find {|v| number?(v) }
       number == nil || number.to_i <= values.size
     }.all?
   end
   # 途中回答をチェックする
   def check_incomplete
-    @group = @summary = nil
-    @group_empty = @summary_empty = nil
-    @group_filled = @summary_filled = nil
+    @group = @hash_keys = @hash_values = nil
+    @group_white = @hash_keys_white = @hash_values_white = nil
+    @group_black = @hash_keys_black = @hash_values_black = nil
 
     check_2x2 &&
       check_continuity_incomplete &&
@@ -360,69 +396,67 @@ class Nurikabe
         v3 = @board[i - 1, j - 0]
         v4 = @board[i - 1, j - 1]
 
-        @board[i - 0, j - 1] = @board[i - 1, j - 0] = F if number?(v1) && number?(v4)
-        @board[i - 0, j - 0] = @board[i - 1, j - 1] = F if number?(v2) && number?(v3)
+        @board[i - 0, j - 1] = @board[i - 1, j - 0] = B if number?(v1) && number?(v4)
+        @board[i - 0, j - 0] = @board[i - 1, j - 1] = B if number?(v2) && number?(v3)
       end
 
       if i >= 2
         v1 = @board[i - 2, j]
         v2 = @board[i - 0, j]
 
-        @board[i - 1, j] = F if number?(v1) && number?(v2)
+        @board[i - 1, j] = B if number?(v1) && number?(v2)
       end
 
       if j >= 2
         v1 = @board[i, j - 2]
         v2 = @board[i, j - 0]
 
-        @board[i, j - 1] = F if number?(v1) && number?(v2)
+        @board[i, j - 1] = B if number?(v1) && number?(v2)
       end
     }
   end
   # 未確定を白と見做したとき、数字が含まれないエリアがある
   # -> エリア内が黒で確定
   def decide_no_number
-    @group_empty = @summary_empty = nil
+    @group_white = @hash_keys_white = @hash_values_white = nil
 
-    summary_empty.each_pair {|index, values|
+    hash_values_white.each_pair {|index, values|
       number = values.find {|v| number?(v) }
       next unless number == nil
 
-      group_empty.each_with_index {|value, i, j|
-        @board[i, j] = F if value == index
+      hash_keys_white[index].each {|i, j|
+        @board[i, j] = B
       }
     }
   end
   # 未確定を白と見做したとき、数字のあるエリアの要素数が数字と同じ
   # -> エリア内の未確定が白で確定
   def decide_number_inner
-    @group_empty = @summary_empty = nil
+    @group_white = @hash_keys_white = @hash_values_white = nil
 
-    summary_empty.each_pair {|index, values|
+    hash_values_white.each_pair {|index, values|
       number = values.find {|v| number?(v) }
       next if number == nil || number.to_i != values.size
 
-      group_empty.each_with_index {|value, i, j|
-        @board[i, j] = E if value == index && !decided?(@board[i, j])
+      hash_keys_white[index].each {|i, j|
+        @board[i, j] = W if !decided?(@board[i, j])
       }
     }
   end
   # 数字のあるエリアの要素数が数字と同じ
   # -> エリア端の上下左右が黒で確定
   def decide_number_outer
-    @group = @summary = nil
+    @group = @hash_keys = @hash_values = nil
 
-    summary.each_pair {|index, values|
+    hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
       next if number == nil || number.to_i != values.size
 
-      group.each_with_index {|value, i, j|
-        next unless value == index
-
-        @board[i - 1, j] = F if i > 0 && group[i - 1, j] != index
-        @board[i, j - 1] = F if j > 0 && group[i, j - 1] != index
-        @board[i + 1, j] = F if i < @n - 1 && group[i + 1, j] != index
-        @board[i, j + 1] = F if j < @m - 1 && group[i, j + 1] != index
+      hash_keys[index].each {|i, j|
+        @board[i - 1, j] = B if i > 0 && group[i - 1, j] != index
+        @board[i, j - 1] = B if j > 0 && group[i, j - 1] != index
+        @board[i + 1, j] = B if i < @n - 1 && group[i + 1, j] != index
+        @board[i, j + 1] = B if j < @m - 1 && group[i, j + 1] != index
       }
     }
   end
@@ -430,17 +464,17 @@ class Nurikabe
   # もしくはエリアがすべて白で、隣接する未確定の個数が1
   # -> 隣接する未確定が白で確定
   def decide_expansion
-    @group = @summary = nil
+    @group = @hash_keys = @hash_values = nil
 
-    summary.each_pair {|index, values|
+    hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
-      count = values.count {|v| empty?(v) }
-      next if number == nil || count == values.size || number.to_i <= values.size
+      count = values.count {|v| white?(v) }
+      next if number == nil
+      next if count == values.size
+      next if number.to_i <= values.size
 
       data = []
-      group.each_with_index {|value, i, j|
-        next unless value == index
-
+      hash_keys[index].each {|i, j|
         data.push([i - 1, j]) if i > 0 && !decided?(@board[i - 1, j])
         data.push([i, j - 1]) if j > 0 && !decided?(@board[i, j - 1])
         data.push([i + 1, j]) if i < @n - 1 && !decided?(@board[i + 1, j])
@@ -449,7 +483,7 @@ class Nurikabe
 
       if data.size == 1
         i, j = data[0]
-        @board[i, j] = E
+        @board[i, j] = W
       end
     }
   end
@@ -477,26 +511,9 @@ class Nurikabe
 
   # 未確定マスを選択する
   def solve_find
-    t = @board.each_with_index.select {|value, i, j|
+    @board.each_with_index.select {|value, i, j|
       !decided?(value)
-    }
-
-    # t = t.map {|value, i, j|
-    #   count = 0
-    #   count += 1 if i == 0 || decided?(@board[i - 1, j])
-    #   count += 1 if j == 0 || decided?(@board[i, j - 1])
-    #   count += 1 if i == @n - 1 || decided?(@board[i + 1, j])
-    #   count += 1 if j == @m - 1 || decided?(@board[i, j + 1])
-    #   count += 1 if i == 0 || j == 0 || decided?(@board[i - 1, j - 1])
-    #   count += 1 if i == 0 || j == @m - 1 || decided?(@board[i - 1, j + 1])
-    #   count += 1 if i == @n - 1 || j == 0 || decided?(@board[i + 1, j - 1])
-    #   count += 1 if i == @n - 1 || j == @m - 1 || decided?(@board[i + 1, j + 1])
-    #   [count, i, j]
-    # }
-
-    # t = t.sort {|v1, v2| v2[0] - v1[0] }
-
-    t.map {|count, i, j| [i, j] }
+    }.map {|count, i, j| [i, j] }
   end
   # 回答を深さ優先で探索する
   def solve
@@ -517,9 +534,9 @@ class Nurikabe
           puts "DEBUG[#{i}, #{j}]:" if $DEBUG
           puts to_s if $DEBUG
 
-          @board[i, j] = F
+          @board[i, j] = B
           queue.push(@board.clone)
-          @board[i, j] = E
+          @board[i, j] = W
           queue.push(@board.clone)
         elsif check
           puts "FOUND:" if $DEBUG
