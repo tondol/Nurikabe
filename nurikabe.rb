@@ -90,7 +90,7 @@ class Nurikabe
   # group
   ######################################
 
-  # 未確定、白・数字、黒に対してそれぞれ異なる値を返却する
+  # 未確定マス、白・数字マス、黒マスに対してそれぞれ異なる値を返却する
   def group_type(v)
     case true
     when white?(v) || number?(v)
@@ -101,11 +101,11 @@ class Nurikabe
       0
     end
   end
-  # 未確定と白・数字を同一視する
+  # 未確定マスと白・数字マスを同一視する
   def group_type_white(v)
     v == U ? group_type(W) : group_type(v)
   end
-  # 未確定と黒を同一視する
+  # 未確定マスと黒マスを同一視する
   def group_type_black(v)
     v == U ? group_type(B) : group_type(v)
   end
@@ -182,7 +182,7 @@ class Nurikabe
       group_type(v1) == group_type(v2)
     }
   end
-  # 未確定を白と見做し、4連結ラベリングする
+  # 未確定マスを白マスと見做し、4連結ラベリングする
   def group_white
     return @group_white if @group_white
 
@@ -190,7 +190,7 @@ class Nurikabe
       group_type_white(v1) == group_type_white(v2)
     }
   end
-  # 未確定を黒と見做し、4連結ラベリングする
+  # 未確定マスを黒マスと見做し、4連結ラベリングする
   def group_black
     return @group_black if @group_black
 
@@ -204,7 +204,7 @@ class Nurikabe
 
     t.each_with_index {|index, i, j|
       h[index] = [] unless h.has_key?(index)
-      h[index].push(yield(index, i, j));
+      h[index].push(yield(index, i, j))
     }
 
     h
@@ -214,7 +214,7 @@ class Nurikabe
   # hash
   ######################################
 
-  # 各エリアの文字配列を要素とする配列
+  # エリア番号とそのエリアが含むマスのHash
   def hash_keys
     return @hash_keys if @hash_keys
 
@@ -222,7 +222,8 @@ class Nurikabe
       [i, j]
     }
   end
-  # 未確定を白と見做したときの、各エリアの文字配列を要素とする配列
+  # 未確定マスを白マスと見做したときの、
+  # エリア番号とそのエリアが含むマス配列のHash
   def hash_keys_white
     return @hash_keys_white if @hash_keys_white
 
@@ -230,7 +231,8 @@ class Nurikabe
       [i, j]
     }
   end
-  # 未確定を黒と見做したときの、各エリアの文字配列を要素とする配列
+  # 未確定マスを黒マスと見做したときの、
+  # エリア番号とそのエリアが含むマス配列のHash
   def hash_keys_black
     return @hash_keys_black if @hash_keys_black
 
@@ -239,7 +241,7 @@ class Nurikabe
     }
   end
 
-  # 各エリアの位置配列を要素とする配列
+  # エリア番号とそのエリアが含むマスの位置配列のHash
   def hash_values
     return @hash_values if @hash_values
 
@@ -247,7 +249,8 @@ class Nurikabe
       @board[i, j]
     }
   end
-  # 未確定を白と見做したときの、各エリアの位置配列を要素とする配列
+  # 未確定マスを白マスと見做したときの、
+  # エリア番号とそのエリアが含むマスの位置配列のHash
   def hash_values_white
     return @hash_values_white if @hash_values_white
 
@@ -255,7 +258,8 @@ class Nurikabe
       @board[i, j]
     }
   end
-  # 未確定を黒と見做したときの、各エリアの位置配列を要素とする配列
+  # 未確定マスを黒マスと見做したときの、
+  # エリア番号とそのエリアが含むマスの位置配列のHash
   def hash_values_black
     return @hash_values_black if @hash_values_black
 
@@ -268,7 +272,7 @@ class Nurikabe
   # check
   ######################################
 
-  # 2x2以上の黒マスの固まりがあるとNG
+  # 2x2以上の黒マスの固まりがあればNG
   def check_2x2
     @board.each_with_index.map {|value, i, j|
       i > 0 && j > 0 && value == B &&
@@ -277,16 +281,17 @@ class Nurikabe
         @board[i - 1, j - 0] == @board[i - 1, j - 1]
     }.none?
   end
-  # 黒が連結である
-  # つまり黒を含むエリアの個数が1
+  # 黒エリアが連結である
   def check_continuity
     hash_values.map {|index, values|
       values.include?(B)
     }.one?
   end
   # 各エリアにおいて下記のどれかが真
-  # -> すべて黒
-  # -> 含まれる数字が1個 && 数字以外はすべて白 && 要素数と数字が同じ
+  # -> すべて黒マス
+  # -> 含まれる数字マスが1個 &&
+  #    数字マス以外はすべて白マス &&
+  #    エリアの要素数とエリアの数字が同じ
   def check_combination
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
@@ -312,8 +317,8 @@ class Nurikabe
       check_combination
   end
 
-  # 未確定を黒と見做したとき、黒が連結である
-  # つまり黒を含むエリアの個数が0または1
+  # 未確定マスを黒マスと見做したとき、黒エリアが連結である
+  # ただし、黒エリアが存在しない場合も連結とする
   def check_continuity_incomplete
     count = hash_values_black.count {|index, values|
       values.include?(B)
@@ -321,10 +326,12 @@ class Nurikabe
     count == 0 || count == 1
   end
   # 各エリアについて下記のどれかが真
-  # -> すべて黒
-  # -> すべて白
-  # -> すべて未確定
-  # -> 含まれる数字が1個 && 数字以外はすべて白 && 要素数が数字以下
+  # -> すべて黒マス
+  # -> すべて白マス
+  # -> すべて未確定マス
+  # -> 含まれる数字マスが1個 &&
+  #    数字マス以外はすべて白マス &&
+  #    エリアの要素数がエリアの数字以下
   def check_combination_incomplete
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
@@ -344,26 +351,41 @@ class Nurikabe
 
     true
   end
-  # 未確定を白と見做したとき、エリアがすべて白ならNG
+  # 未確定マスを白マスと見做したとき、エリア内のマスがすべて白マスならばNG
   def check_no_number
     hash_values_white.map {|index, values|
       count = values.count {|v| white?(v) }
-      count != values.size
-    }.all?
+      count == values.size
+    }.none?
   end
-  # エリアの要素数が数字以下ならOK
-  # -> 今後の拡張を考慮する
+  # エリアの数字がエリアの要素数未満ならばNG
   def check_number_less
     hash_values.map {|index, values|
       number = values.find {|v| number?(v) }
-      number == nil || number.to_i >= values.size
-    }.all?
+      number && number.to_i < values.size
+    }.none?
   end
-  # 未確定を白と見做したとき、エリアの要素数が数字以上ならOK
+  # 未確定マスを白マスと見做したとき、エリアの要素数がエリアの数字未満ならばNG
   def check_number_more
     hash_values_white.map {|index, values|
       number = values.find {|v| number?(v) }
-      number == nil || number.to_i <= values.size
+      number && number.to_i > values.size
+    }.none?
+  end
+  # エリアの白マスの個数が「全エリアの数字の最大値」未満ならばOK
+  def check_number_max
+    max_number = 0
+
+    hash_values.each_pair {|index, values|
+      number = values.find {|v| number?(v) }
+      next unless number
+
+      max_number = number.to_i if number.to_i > max_number
+    }
+
+    hash_values.map {|index, values|
+      count = values.count {|v| white?(v) }
+      count < max_number
     }.all?
   end
   # 途中回答をチェックする
@@ -372,12 +394,18 @@ class Nurikabe
     @group_white = @hash_keys_white = @hash_values_white = nil
     @group_black = @hash_keys_black = @hash_values_black = nil
 
+    proc = proc {|name, result|
+      puts "#{name}: #{result}" if $DEBUG
+      return unless result
+    }
+
     check_2x2 &&
       check_continuity_incomplete &&
       check_combination_incomplete &&
       check_no_number &&
       check_number_less &&
-      check_number_more
+      check_number_more &&
+      check_number_max
   end
 
   ######################################
@@ -385,9 +413,9 @@ class Nurikabe
   ######################################
 
   # 数字マスが2x2の対角にある
-  # -> 数字マス以外の2マスが黒で確定
+  # -> 数字マス以外の2マスが黒マスで確定
   # 数字マスが1マス挟んで隣り合っている
-  # -> 間の1マスが黒で確定
+  # -> 間の1マスが黒マスで確定
   def decide_neighbor
     @board.each_with_index {|value, i, j|
       if i > 0 && j > 0
@@ -415,42 +443,44 @@ class Nurikabe
       end
     }
   end
-  # 未確定を白と見做したとき、数字が含まれないエリアがある
-  # -> エリア内が黒で確定
+  # 未確定マスを白マスと見做したとき、エリア内の数字マスが0個
+  # -> エリア内のマスがすべて黒マスで確定
   def decide_no_number
     @group_white = @hash_keys_white = @hash_values_white = nil
 
     hash_values_white.each_pair {|index, values|
       number = values.find {|v| number?(v) }
-      next unless number == nil
+      next if number
 
       hash_keys_white[index].each {|i, j|
         @board[i, j] = B
       }
     }
   end
-  # 未確定を白と見做したとき、数字のあるエリアの要素数が数字と同じ
-  # -> エリア内の未確定が白で確定
+  # 未確定マスを白マスと見做したとき、エリアの要素数がエリアの数字と同じ
+  # -> エリア内の未確定マスが白マスで確定
   def decide_number_inner
     @group_white = @hash_keys_white = @hash_values_white = nil
 
     hash_values_white.each_pair {|index, values|
       number = values.find {|v| number?(v) }
-      next if number == nil || number.to_i != values.size
+      next unless number
+      next unless number.to_i == values.size
 
       hash_keys_white[index].each {|i, j|
         @board[i, j] = W if !decided?(@board[i, j])
       }
     }
   end
-  # 数字のあるエリアの要素数が数字と同じ
-  # -> エリア端の上下左右が黒で確定
+  # エリアの要素数がエリアの数字と同じ
+  # -> エリアに隣接するマスが黒マスで確定
   def decide_number_outer
     @group = @hash_keys = @hash_values = nil
 
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
-      next if number == nil || number.to_i != values.size
+      next unless number
+      next unless number.to_i == values.size
 
       hash_keys[index].each {|i, j|
         @board[i - 1, j] = B if i > 0 && group[i - 1, j] != index
@@ -460,18 +490,16 @@ class Nurikabe
       }
     }
   end
-  # 数字のあるエリアの要素数が数字未満で、隣接する未確定の個数が1
-  # もしくはエリアがすべて白で、隣接する未確定の個数が1
-  # -> 隣接する未確定が白で確定
+  # エリアの要素数がエリアの数字未満で、隣接する未確定の個数が1
+  # もしくはエリアがすべて白マスで、隣接する未確定の個数が1
+  # -> エリアに隣接する未確定マスが白マスで確定
   def decide_expansion
     @group = @hash_keys = @hash_values = nil
 
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
       count = values.count {|v| white?(v) }
-      next if number == nil
-      next if count == values.size
-      next if number.to_i <= values.size
+      next if (!number || number.to_i <= values.size) && count != values.size
 
       data = []
       hash_keys[index].each {|i, j|
@@ -484,6 +512,9 @@ class Nurikabe
       if data.size == 1
         i, j = data[0]
         @board[i, j] = W
+
+        # ラベリングから再計算する
+        return
       end
     }
   end
@@ -509,13 +540,28 @@ class Nurikabe
   # solve
   ######################################
 
-  # 未確定マスを選択する
+  # 隣接する確定マスの個数を数える
+  def solve_count(i, j)
+    count = 0
+    count += 1 if i == 0 || decided?(@board[i - 1, j])
+    count += 1 if j == 0 || decided?(@board[i, j - 1])
+    count += 1 if i == @n - 1 || decided?(@board[i + 1, j])
+    count += 1 if j == @m - 1 || decided?(@board[i, j + 1])
+    count
+  end
+  # 未確定マスを抽出する
   def solve_find
     @board.each_with_index.select {|value, i, j|
       !decided?(value)
-    }.map {|count, i, j| [i, j] }
+    # }.sort {|v1, v2|
+    #   _, i1, j1 = v1
+    #   _, i2, j2 = v2
+    #   solve_count(i2, j2) - solve_count(i1, j1)
+    }.map {|count, i, j|
+      [i, j]
+    }
   end
-  # 回答を深さ優先で探索する
+  # 解を深さ優先で探索する
   def solve
     queue = [@board]
 
