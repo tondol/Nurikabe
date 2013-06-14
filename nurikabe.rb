@@ -214,7 +214,7 @@ class Nurikabe
   # hash
   ######################################
 
-  # エリア番号とそのエリアが含むマスのHash
+  # エリア番号と「各マスの値の配列」のHash
   def hash_keys
     return @hash_keys if @hash_keys
 
@@ -223,7 +223,7 @@ class Nurikabe
     }
   end
   # 未確定マスを白マスと見做したときの、
-  # エリア番号とそのエリアが含むマス配列のHash
+  # エリア番号と「各マスの値の配列」のHash
   def hash_keys_white
     return @hash_keys_white if @hash_keys_white
 
@@ -232,7 +232,7 @@ class Nurikabe
     }
   end
   # 未確定マスを黒マスと見做したときの、
-  # エリア番号とそのエリアが含むマス配列のHash
+  # エリア番号と「各マスの値の配列」のHash
   def hash_keys_black
     return @hash_keys_black if @hash_keys_black
 
@@ -241,7 +241,7 @@ class Nurikabe
     }
   end
 
-  # エリア番号とそのエリアが含むマスの位置配列のHash
+  # エリア番号と「各マスのXY座標の配列」のHash
   def hash_values
     return @hash_values if @hash_values
 
@@ -250,7 +250,7 @@ class Nurikabe
     }
   end
   # 未確定マスを白マスと見做したときの、
-  # エリア番号とそのエリアが含むマスの位置配列のHash
+  # エリア番号と「各マスのXY座標の配列」のHash
   def hash_values_white
     return @hash_values_white if @hash_values_white
 
@@ -259,7 +259,7 @@ class Nurikabe
     }
   end
   # 未確定マスを黒マスと見做したときの、
-  # エリア番号とそのエリアが含むマスの位置配列のHash
+  # エリア番号と「各マスのXY座標の配列」のHash
   def hash_values_black
     return @hash_values_black if @hash_values_black
 
@@ -291,7 +291,7 @@ class Nurikabe
   # -> すべて黒マス
   # -> 含まれる数字マスが1個 &&
   #    数字マス以外はすべて白マス &&
-  #    エリアの要素数とエリアの数字が同じ
+  #    エリアの数字とエリアの要素数が同じ
   def check_combination
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
@@ -331,7 +331,7 @@ class Nurikabe
   # -> すべて未確定マス
   # -> 含まれる数字マスが1個 &&
   #    数字マス以外はすべて白マス &&
-  #    エリアの要素数がエリアの数字以下
+  #    エリアの数字がエリアの要素数以上
   def check_combination_incomplete
     hash_values.each_pair {|index, values|
       number = values.find {|v| number?(v) }
@@ -365,7 +365,7 @@ class Nurikabe
       number && number.to_i < values.size
     }.none?
   end
-  # 未確定マスを白マスと見做したとき、エリアの要素数がエリアの数字未満ならばNG
+  # 未確定マスを白マスと見做したとき、エリアの数字がエリアの要素数を上回るならばNG
   def check_number_more
     hash_values_white.map {|index, values|
       number = values.find {|v| number?(v) }
@@ -457,7 +457,7 @@ class Nurikabe
       }
     }
   end
-  # 未確定マスを白マスと見做したとき、エリアの要素数がエリアの数字と同じ
+  # 未確定マスを白マスと見做したとき、エリアの数字がエリアの要素数と同じ
   # -> エリア内の未確定マスが白マスで確定
   def decide_number_inner
     @group_white = @hash_keys_white = @hash_values_white = nil
@@ -472,7 +472,7 @@ class Nurikabe
       }
     }
   end
-  # エリアの要素数がエリアの数字と同じ
+  # エリアの数字がエリアの要素数と同じ
   # -> エリアに隣接するマスが黒マスで確定
   def decide_number_outer
     @group = @hash_keys = @hash_values = nil
@@ -490,8 +490,8 @@ class Nurikabe
       }
     }
   end
-  # エリアの要素数がエリアの数字未満で、隣接する未確定の個数が1
-  # もしくはエリアがすべて白マスで、隣接する未確定の個数が1
+  # エリアの数字がエリアの要素数を上回り、隣接する未確定マスが1個
+  # もしくはエリアがすべて白マスで、隣接する未確定マスが1個
   # -> エリアに隣接する未確定マスが白マスで確定
   def decide_expansion
     @group = @hash_keys = @hash_values = nil
