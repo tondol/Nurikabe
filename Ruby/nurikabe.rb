@@ -598,4 +598,3 @@ board = $stdin.read.gsub(/[\r\n]/, String.new).split(//)
 
 nurikabe = Nurikabe.new(n, m, Matrix.new(n, m, board))
 nurikabe.solve
-puts nurikabe

@@ -818,11 +818,9 @@ public class Nurikabe {
 	 */
 	static public void main(String[] args) {
 		try {
-			Matrix matrix = Utils.readProblem(System.in);
+			Matrix matrix = Utils.readNurikabe(System.in);
 			Nurikabe nurikabe = new Nurikabe(matrix);
-			System.out.println(nurikabe);
-			System.out.println(nurikabe.solve());
-			System.out.println(nurikabe.validate());
+			nurikabe.solve();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -31,7 +31,7 @@ public class Utils {
 		}
 	}
 
-	static public Matrix readProblem(InputStream in) throws IOException {
+	static public Matrix readNurikabe(InputStream in) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line = br.readLine();
 
