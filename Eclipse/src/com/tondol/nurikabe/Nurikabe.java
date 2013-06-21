@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Stack;
 
 public class Nurikabe {
-	public static final int U = 0;
+	public static final int E = 0;
 	public static final int W = Integer.MIN_VALUE;
 	public static final int B = Integer.MAX_VALUE;
 
