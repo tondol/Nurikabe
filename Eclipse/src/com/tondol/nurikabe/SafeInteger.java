@@ -11,6 +11,7 @@ public class SafeInteger {
 		if (mObject != null) {
 			return mObject.intValue();
 		}
+
 		return defValue;
 	}
 }

@@ -35,8 +35,8 @@ public class Matrix implements Cloneable {
 			for (int j=0;j<mW;j++) {
 				sb.append(mValues[i * mW + j]);
 
-				// ƒJƒ“ƒ}‹æØ‚è‚Åo—Í‚·‚é
-				// ÅIs‚Í‰üs‚ðƒXƒLƒbƒv
+				// ã‚«ãƒ³ãƒžåŒºåˆ‡ã‚Šã§å‡ºåŠ›ã™ã‚‹
+				// æœ€çµ‚è¡Œã¯æ”¹è¡Œã‚’ã‚¹ã‚­ãƒƒãƒ—
 				if (j == mW - 1) {
 					if (i != mH - 1) {
 						sb.append("\n");

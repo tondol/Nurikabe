@@ -43,7 +43,7 @@ public class Nurikabe {
 		}
 		@Override
 		public String toString() {
-			return String.format("{ v1=%d, v2=%d }", v1, v2);
+			return String.format("GroupPair: v1=%d, v2=%d", v1, v2);
 		}
 	}
 	private static class SummaryEntry {
@@ -59,7 +59,7 @@ public class Nurikabe {
 		@Override
 		public String toString() {
 			String s = Utils.valueToString(value);
-			return String.format("{ x=%d, y=%d, value=%s }", x, y, s);
+			return String.format("SummaryEntry: x=%d, y=%d, value=%s", x, y, s);
 		}
 	}
 	private static class Position {
@@ -72,7 +72,7 @@ public class Nurikabe {
 		}
 		@Override
 		public String toString() {
-			return String.format("{ x=%d, y=%d }", x, y);
+			return String.format("Position: x=%d, y=%d", x, y);
 		}
 	}
 
@@ -321,7 +321,7 @@ public class Nurikabe {
 		int count = 0;
 		Map<Integer, List<SummaryEntry>> summary = summary();
 
-		// •‚Ì‚ ‚éƒGƒŠƒA”‚ð”‚¦‚é
+		// é»’ã®ã‚ã‚‹ã‚¨ãƒªã‚¢æ•°ã‚’æ•°ãˆã‚‹
 		for (List<SummaryEntry> entries : summary.values()) {
 			for (SummaryEntry entry : entries) {
 				if (isBlack(entry.value)) {
@@ -342,7 +342,7 @@ public class Nurikabe {
 			int countN = 0;
 			int countB = 0;
 
-			// Šeƒ}ƒX‚ð”‚¦‚éE”Žš‚ðŒŸõ‚·‚é
+			// å„ãƒžã‚¹ã‚’æ•°ãˆã‚‹ãƒ»æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isWhite(entry.value)) {
 					countW++;
@@ -372,7 +372,7 @@ public class Nurikabe {
 		int count = 0;
 		Map<Integer, List<SummaryEntry>> summary = summaryBlack();
 
-		// •‚Ì‚ ‚éƒGƒŠƒA”‚ð”‚¦‚é
+		// é»’ã®ã‚ã‚‹ã‚¨ãƒªã‚¢æ•°ã‚’æ•°ãˆã‚‹
 		for (List<SummaryEntry> entries : summary.values()) {
 			for (SummaryEntry entry : entries) {
 				if (isBlack(entry.value)) {
@@ -394,7 +394,7 @@ public class Nurikabe {
 			int countN = 0;
 			int countB = 0;
 
-			// Šeƒ}ƒX‚ð”‚¦‚éE”Žš‚ðŒŸõ‚·‚é
+			// å„ãƒžã‚¹ã‚’æ•°ãˆã‚‹ãƒ»æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isWhite(entry.value)) {
 					countW++;
@@ -430,7 +430,7 @@ public class Nurikabe {
 		for (List<SummaryEntry> entries : summary.values()) {
 			int count = 0;
 
-			// ”’ƒ}ƒX‚ð”‚¦‚é
+			// ç™½ãƒžã‚¹ã‚’æ•°ãˆã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isWhite(entry.value)) {
 					count++;
@@ -450,7 +450,7 @@ public class Nurikabe {
 		for (List<SummaryEntry> entries : summary.values()) {
 			int number = 0;
 
-			// ”Žš‚ðŒŸõ‚·‚é
+			// æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isNumber(entry.value)) {
 					number = entry.value;
@@ -473,7 +473,7 @@ public class Nurikabe {
 		for (List<SummaryEntry> entries : summary.values()) {
 			int number = 0;
 
-			// ”Žš‚ðŒŸõ‚·‚é
+			// æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isNumber(entry.value)) {
 					number = entry.value;
@@ -526,27 +526,27 @@ public class Nurikabe {
 		for (int i=0;i<h;i++) {
 			for (int j=0;j<w;j++) {
 				if (i > 0 && j > 0) {
-					if (isNumber(mBoard.get(i - 1, j)) &&
-							isNumber(mBoard.get(i, j - 1))) {
+					if (isNumber(mBoard.get(i - 1, j - 0)) &&
+							isNumber(mBoard.get(i - 0, j - 1))) {
 						mBoard.put(i - 1, j - 1, B);
-						mBoard.put(i, j, B);
+						mBoard.put(i - 0, j - 0, B);
 						invalidate();
 					} else if (isNumber(mBoard.get(i - 1, j - 1)) &&
-							isNumber(mBoard.get(i, j))) {
-						mBoard.put(i - 1, j, B);
-						mBoard.put(i, j - 1, B);
+							isNumber(mBoard.get(i - 0, j - 0))) {
+						mBoard.put(i - 1, j - 0, B);
+						mBoard.put(i - 0, j - 1, B);
 						invalidate();
 					}
 				}
 				if (i >= 2 &&
 						isNumber(mBoard.get(i - 2, j)) &&
-						isNumber(mBoard.get(i, j))) {
+						isNumber(mBoard.get(i - 0, j))) {
 					mBoard.put(i - 1, j, B);
 					invalidate();
 				}
 				if (j >= 2 &&
 						isNumber(mBoard.get(i, j - 2)) &&
-						isNumber(mBoard.get(i, j))) {
+						isNumber(mBoard.get(i, j - 0))) {
 					mBoard.put(i, j - 1, B);
 					invalidate();
 				}
@@ -559,7 +559,7 @@ public class Nurikabe {
 		for (List<SummaryEntry> entries : summary.values()) {
 			int number = 0;
 
-			// ”Žš‚ðŒŸõ‚·‚é
+			// æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isNumber(entry.value)) {
 					number = entry.value;
@@ -586,7 +586,7 @@ public class Nurikabe {
 			int index = pair.getKey();
 			List<SummaryEntry> entries = pair.getValue();
 
-			// ”Žš‚ðŒŸõ‚·‚é
+			// æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isNumber(entry.value)) {
 					number = entry.value;
@@ -618,7 +618,7 @@ public class Nurikabe {
 			int index = pair.getKey();
 			List<SummaryEntry> entries = pair.getValue();
 
-			// ”Žš‚ðŒŸõ‚·‚é
+			// æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isNumber(entry.value)) {
 					number = entry.value;
@@ -662,7 +662,7 @@ public class Nurikabe {
 			int index = pair.getKey();
 			List<SummaryEntry> entries = pair.getValue();
 
-			// ”’ƒ}ƒX‚ð”‚¦‚éE”Žš‚ðŒŸõ‚·‚é
+			// ç™½ãƒžã‚¹ã‚’æ•°ãˆã‚‹ãƒ»æ•°å­—ã‚’æ¤œç´¢ã™ã‚‹
 			for (SummaryEntry entry : entries) {
 				if (isWhite(entry.value)) {
 					count++;
@@ -697,7 +697,7 @@ public class Nurikabe {
 					final int i = positions.get(0).y;
 					final int j = positions.get(0).x;
 
-					// ƒ‰ƒxƒŠƒ“ƒO‚©‚ç‚â‚è’¼‚·•K—v‚ª‚ ‚é
+					// ãƒ©ãƒ™ãƒªãƒ³ã‚°ã‹ã‚‰ã‚„ã‚Šç›´ã™å¿…è¦ãŒã‚ã‚‹
 					mBoard.put(i, j, W);
 					invalidate();
 					return;
@@ -738,7 +738,7 @@ public class Nurikabe {
 	/**
 	 * Solve
 	 */
-	private List<Position> findNotFilledYet() {
+	private List<Position> findEmptyCells() {
 		final int w = mBoard.getW();
 		final int h = mBoard.getH();
 		List<Position> positions = new ArrayList<Position>();
@@ -764,7 +764,7 @@ public class Nurikabe {
 			if (validateInSearching()) {
 				fill();
 
-				List<Position> positions = findNotFilledYet();
+				List<Position> positions = findEmptyCells();
 
 				if (!positions.isEmpty()) {
 					final int i = positions.get(0).y;
@@ -804,7 +804,7 @@ public class Nurikabe {
 				int value = mBoard.get(i, j);
 				sb.append(Utils.valueToString(value));
 
-				// ÅIs‚Í‰üs‚ðƒXƒLƒbƒv
+				// æœ€çµ‚è¡Œã¯æ”¹è¡Œã‚’ã‚¹ã‚­ãƒƒãƒ—
 				if (j == w - 1 && i != h - 1) {
 					sb.append("\n");
 				}
