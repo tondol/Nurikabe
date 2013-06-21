@@ -67,10 +67,7 @@ class Nurikabe
   end
 
   def to_s
-    s = "\##{@n} #{@m}"
-    s << "\n"
-    s << @board.each_slice(@m).map {|row| row.map(&:to_s).join }.join("\n")
-    s
+    @board.each_slice(@m).map {|row| row.map(&:to_s).join }.join("\n")
   end
 
   def white?(v)
