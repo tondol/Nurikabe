@@ -358,13 +358,6 @@ class Nurikabe
       count == values.size
     }.none?
   end
-  # エリアの数字がエリアの要素数未満ならばNG
-  def check_number_less
-    hash_values.map {|index, values|
-      number = values.find {|v| number?(v) }
-      number && number.to_i < values.size
-    }.none?
-  end
   # 未確定マスを白マスと見做したとき、エリアの数字がエリアの要素数を上回るならばNG
   def check_number_more
     hash_values_white.map {|index, values|
@@ -403,7 +396,6 @@ class Nurikabe
       check_continuity_incomplete &&
       check_combination_incomplete &&
       check_no_number &&
-      check_number_less &&
       check_number_more &&
       check_number_max
   end
