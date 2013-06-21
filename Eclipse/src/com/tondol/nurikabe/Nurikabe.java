@@ -25,7 +25,10 @@ public class Nurikabe {
 	}
 
 	/**
-	 * GroupFunction / GroupPair / SummaryEntry
+	 * GroupFunction,
+	 * GroupPair,
+	 * SummaryEntry,
+	 * Position
 	 */
 	private interface GroupFunction {
 		public int f(int value);
@@ -575,7 +578,7 @@ public class Nurikabe {
 			}
 		}
 	}
-	private void fillInnerCellsInAreaWithNumber() {
+	private void fillCellsInAreaWithNumber() {
 		Map<Integer, List<SummaryEntry>> summary = summaryWhite();
 
 		for (Map.Entry<Integer, List<SummaryEntry>> pair : summary.entrySet()) {
@@ -604,7 +607,7 @@ public class Nurikabe {
 			}
 		}
 	}
-	private void fillOuterCellsInAreaWithNumber() {
+	private void fillEdgeCellsOfAreaWithNumber() {
 		final int w = mBoard.getW();
 		final int h = mBoard.getH();
 		Map<Integer, List<SummaryEntry>> summary = summary();
@@ -726,8 +729,8 @@ public class Nurikabe {
 
 			fillNeighborCells();
 			fillCellsInAreaWithoutNumber();
-			fillInnerCellsInAreaWithNumber();
-			fillOuterCellsInAreaWithNumber();
+			fillCellsInAreaWithNumber();
+			fillEdgeCellsOfAreaWithNumber();
 			fillCellsExtensible();
 		}
 	}
@@ -735,7 +738,7 @@ public class Nurikabe {
 	/**
 	 * Solve
 	 */
-	private List<Position> findNotDecidedYet() {
+	private List<Position> findNotFilledYet() {
 		final int w = mBoard.getW();
 		final int h = mBoard.getH();
 		List<Position> positions = new ArrayList<Position>();
@@ -761,7 +764,7 @@ public class Nurikabe {
 			if (validateInSearching()) {
 				fill();
 
-				List<Position> positions = findNotDecidedYet();
+				List<Position> positions = findNotFilledYet();
 
 				if (!positions.isEmpty()) {
 					final int i = positions.get(0).y;
@@ -788,7 +791,7 @@ public class Nurikabe {
 	}
 
 	/**
-	 * Interface
+	 * Object
 	 */
 	@Override
 	public String toString() {
@@ -815,7 +818,7 @@ public class Nurikabe {
 	 */
 	static public void main(String[] args) {
 		try {
-			Matrix matrix = Utils.readMatrix(System.in);
+			Matrix matrix = Utils.readProblem(System.in);
 			Nurikabe nurikabe = new Nurikabe(matrix);
 			System.out.println(nurikabe);
 			System.out.println(nurikabe.solve());

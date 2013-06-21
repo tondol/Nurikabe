@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
-	static public int valueFromString(String s) {
+	static public int stringToValue(String s) {
 		if (s.equals(" ")) {
 			return Nurikabe.W;
 		} else if (s.matches("\\d")) {
@@ -31,7 +31,7 @@ public class Utils {
 		}
 	}
 
-	static public Matrix readMatrix(InputStream in) throws IOException {
+	static public Matrix readProblem(InputStream in) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line = br.readLine();
 
@@ -49,7 +49,7 @@ public class Utils {
 			String row = br.readLine();
 			for (int j=0;j<m;j++) {
 				String s = row.substring(j, j + 1);
-				matrix.put(i, j, valueFromString(s));
+				matrix.put(i, j, stringToValue(s));
 			}
 		}
 
